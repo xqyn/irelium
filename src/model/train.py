@@ -1,7 +1,7 @@
 '''
 irelium
 XQ
-2026-05-36
+2026-05-26
 '''
 
 import numpy as np
