@@ -23,15 +23,14 @@ def train(
     Train model for one step and return scalar loss.
 
     Args:
-        x: Input tensor, any shape.
-        y: Target tensor, any shape compatible with loss_fn.
-        model: Any nn.Module — moved to device before call.
-        loss_fn: Any callable (nn.Module subclass, closure, or plain function)
-                 with signature (pred, target) -> scalar Tensor.
-        optimizer: Any torch optimizer bound to model.parameters().
+        x:         Input tensor or numpy array.
+        y:         Target tensor or numpy array.
+        model:     Any nn.Module.
+        optimizer: Any torch optimizer.
+        step_fn:   Callable(x, y, model) -> scalar Tensor.
 
     Returns:
-        Scalar loss value as Python float.
+        Scalar loss as Python float.
 
     Raises:
         TypeError: If x or y are not torch.Tensor.
