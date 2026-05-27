@@ -35,7 +35,7 @@ class ConvNormBlock(nn.Module):
         stride: int,
         padding: int
     ) -> None:
-        super().__init__
+        super().__init__()
         self.block = nn.Sequential(
             nn.Conv2d(
                 in_channels, out_channels,

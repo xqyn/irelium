@@ -6,6 +6,7 @@ cnn baseline
 '''
 
 import torch.nn as nn
+#from ..neuron.block import ConvNormBlock
 from neuron.block import ConvNormBlock
 
 def cnnConvNorm(
