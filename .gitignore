@@ -1,0 +1,23 @@
+
+img/
+
+# cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# editable
+*.egg-info/
+*.egg
+
+# jupyter
+.ipynb_checkpoints/
+
+.vscode/
+# os
+.DS_Store
+
+# environment
+.env
+
