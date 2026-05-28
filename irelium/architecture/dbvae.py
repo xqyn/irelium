@@ -11,9 +11,9 @@ import torch.nn as nn
 
 
 from pathlib import Path
-from model.cnn import cnnConvNorm
-from model.vae import cnnDecoder
-from utils import as_tensor
+from irelium.architecture.cnn import cnnConvNorm
+from irelium.architecture.vae import cnnDecoder
+from irelium.utils import as_tensor
 
 #Path(__file__).parent.parent / "config" / "color" / "colors.yaml"
 
@@ -38,12 +38,21 @@ class DB_VAE(nn.Module):
     def __init__(self,
                  H: int,
                  W: int,
-                 latent_dim: int = 100,
+                 in_channels: int,
+                 latent_dim: int,
+                 base_filter: int,
+                 
                  ):
         super().__init__()
         self.latent_dim = latent_dim
-        self.encoder = cnnConvNorm(n_outputs=2 * latent_dim + 1, H=H, W=W)
-        self.decoder = cnnDecoder()
+        self.encoder = cnnConvNorm(n_outputs=2 * latent_dim + 1, 
+                                   H=H, W=W, 
+                                   in_channels=in_channels, 
+                                   base_filter=base_filter, 
+                                   stride=2, 
+                                   channel_schedule=[1, 2, 4, 6])
+        self.decoder = cnnDecoder(latent_dim=latent_dim, 
+                                  base_filter=base_filter)
         
     def encode(self,
                x: torch.Tensor) -> tuple:
@@ -198,7 +207,7 @@ def get_latent_mu(
     
     with torch.inference_mode():
         for start in range(0, len(images_t), batch_size):
-            batch = image_t[start:start + batch_size].permute(0, 3, 1, 2)
+            batch = images_t[start:start + batch_size].permute(0, 3, 1, 2)
             _, z_mean, _ = model.encode(batch)
             all_z_mean.append(z_mean.cpu())
     

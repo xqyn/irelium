@@ -8,6 +8,7 @@ loss compute
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from irelium.architecture.dbvae import DB_VAE
 
 # --- DB-VAE -----------------------------------------------
 # --- VAE loss
@@ -69,7 +70,7 @@ def _classification_loss(
 
 
 # --- total dbvae loss
-def debiasing_loss(
+def _debiasing_loss(
     x: torch.Tensor,
     x_pred: torch.Tensor,
     y: torch.Tensor,
@@ -114,3 +115,34 @@ def debiasing_loss(
     total_loss = torch.mean(cls_loss + indicate * vae_loss)
     
     return total_loss, cls_loss
+
+
+def dbvae_step_fn(
+    x: torch.Tensor,
+    y: torch.Tensor,
+    dbvae: DB_VAE,
+) -> nn.Module:
+    '''
+    One forward pass + DB-VAE loss computation.
+
+    Args:
+        x:     Input image batch  [B, C, H, W].
+        y:     Binary labels      [B, 1].
+        dbvae: DB_VAE model.
+
+    Returns:
+        Scalar total loss Tensor.
+    '''
+    
+    # make prediction
+    y_logit, z_mean, z_logsigma, recon = dbvae(x)
+    
+    total_loss, _ = _debiasing_loss(
+            x=x,
+            x_pred=recon,
+            y=y,
+            y_logit=y_logit,
+            mu=z_mean,
+            log_sigma=z_logsigma, 
+            )
+    return total_loss

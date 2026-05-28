@@ -7,11 +7,11 @@ dbvae
 
 import torch
 import torch.nn as nn
-from neuron.block import ConvTransposeBlock
+from irelium.neuron.block import ConvTransposeBlock
 
 def cnnDecoder(
-    latent_dim: int = 100,
-    base_filter: int = cnn_n_filter,
+    latent_dim: int,
+    base_filter: int,
     bottleneck_multiplier: int = 6,
     stride: int = 2,
     channel_schedule: list = [4, 2, 1, 0],
@@ -81,3 +81,27 @@ def cnnDecoder(
     )
     
     return model
+
+# --------------------------------------------------
+# UTILITY BLOCKS
+# --------------------------------------------------
+class _Reshape(nn.Module):
+    '''
+    Reshape tensor to target shape inside nn.Sequential.
+
+    Enables latent vector → spatial feature map transition
+    in decoder without breaking the Sequential pipeline.
+
+    Args:
+        *shape: Target shape excluding batch dimension.
+
+    Example:
+        Reshape(256, 4, 4)  # [B, 4096] → [B, 256, 4, 4]
+    '''
+
+    def __init__(self, *shape: int) -> None:
+        super().__init__()
+        self.shape = shape
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return x.view(-1, *self.shape)
