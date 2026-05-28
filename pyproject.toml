@@ -9,4 +9,4 @@ description = 'irelium'
 requires-python = '>=3.11'
 
 [tool.setuptools.packages.find]
-where = ['src']
+where = ['.']

@@ -9,7 +9,8 @@ import torch
 import torch.nn as nn
 
 from pathlib import Path
-from utils import as_tensor
+from irelium.utils import as_tensor
+from typing import Callable
 
 
 def train(
@@ -50,8 +51,43 @@ def train(
     loss.backward()     # backpropagation
     optimizer.step()
     
-    return loss.item()
+    return loss
     
+
+def evaluation(
+    x: torch.Tensor,
+    y: torch.Tensor,
+    model: nn.Module,
+    pred_fn: Callable[[torch.Tensor], torch.Tensor],
+    metric_fn: Callable[[torch.Tensor, torch.Tensor], torch.Tensor],
+) -> float:
+    '''
+    Evaluate model on a single batch and return a scalar metric.
+
+    Args:
+        x:         Input tensor  [B, ...].
+        y:         Target tensor [B, ...].
+        model:     Any nn.Module.
+        metric_fn: Callable(y_pred, y_true) -> scalar Tensor.
+        pred_fn:   Callable(logits) -> predictions.
+
+    Returns:
+        Scalar metric as Python float.
+    '''
+    if not isinstance(x, torch.Tensor) or not isinstance(y, torch.Tensor):
+        raise TypeError(f"x and y must be torch.Tensor, got {type(x)}, {type(y)}")
+
+    # sending x, y into same accelerator
+    x = as_tensor(x, model = model)
+    y = as_tensor(y, model = model)
     
+    # model evaluation
+    model.eval()
     
-    
+    with torch.inference_mode():
+        logits = model(x)
+        y_pred = pred_fn(logits)
+        metric = metric_fn(y_pred, y)
+    return metric
+        
+        
