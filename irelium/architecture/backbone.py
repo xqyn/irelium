@@ -2,19 +2,22 @@
 irelium
 XQ
 2026-05-20
-cnn baseline
+CNN backbone with linear classification head.
+    05-29: add _CFG
 '''
 
 import torch.nn as nn
-from irelium.neuron.block import ConvNormBlock
+from irelium.neuron.conv import ConvNormBlock
+from irelium.utils import load_config
 
-def cnnConvNorm(
+_CFG = load_config("backbone")
+
+def ConvBackbone(
     n_outputs: int,
     H: int,
     W: int,
     in_channels: int,
     base_filter: int,
-    stride: int,
     channel_schedule: list,
 ) -> nn.Sequential:
     '''
@@ -22,21 +25,23 @@ def cnnConvNorm(
 
     Args:
         n_outputs:        Number of output logits.
-        H:                Input image height (must be divisible by stride^n_blocks).
-        W:                Input image width  (must be divisible by stride^n_blocks).
+        H:                Input image height — must be divisible by stride^len(channel_schedule).
+        W:                Input image width  — must be divisible by stride^len(channel_schedule).
         in_channels:      Input image channels.
         base_filter:      Base filter count, scaled per block by channel_schedule.
-        stride:           Stride per block — each block divides H and W by stride.
-        channel_schedule: Filter multipliers per block — controls depth and capacity.
+        channel_schedule: Filter multipliers per block — controls depth and width.
 
     Returns:
-        nn.Sequential model on `device`.
+        nn.Sequential backbone.
 
     Raises:
         ValueError: If H or W are not divisible by stride^len(channel_schedule).
     '''
+    stride       = _CFG.conv.stride
+    kernel_size  = _CFG.conv.kernel_size
+    padding      = _CFG.conv.padding
+    hidden_dim   = _CFG.head.hidden_dim
     
-    # stride compounds: stride=2, 4 blocks → 2^4=16 total spatial reduction
     stride_times = stride ** len(channel_schedule)
     
     if H % stride_times != 0 or W % stride_times != 0:
@@ -54,25 +59,21 @@ def cnnConvNorm(
             ConvNormBlock(
                 in_channels=in_ch,
                 out_channels=out_ch,
-                kernel_size=5,
+                kernel_size=kernel_size,
                 stride=stride,
-                padding=2,
+                padding=padding,
             )
         )
         in_ch = out_ch 
     
-    # last block outputs channel_schedule[-1] * base_filter channels
-    flat_dim = (H // stride_times) * (W // stride_times) * channel_schedule[-1] * base_filter
+    flat_dim = (H // stride_times) * (W // stride_times) * in_ch
 
-    models = nn.Sequential(
-        # convo layers
+    backbone = nn.Sequential(
         *conv_blocks,
-        # classification layers
-        ## flatten [B, C, H, W] → [B, C*H*W]
         nn.Flatten(), 
-        nn.Linear(flat_dim, 512),
+        nn.Linear(flat_dim, hidden_dim),
         nn.ReLU(inplace=True),
-        nn.Linear(512, n_outputs),
+        nn.Linear(hidden_dim, n_outputs),
     )    
       
-    return models
+    return backbone

@@ -2,7 +2,7 @@
 irelium
 XQ
 2026-05-20
-loss compute
+DB-VAE loss functions.
 '''
 
 import torch
@@ -10,8 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from irelium.architecture.dbvae import DB_VAE
 
-# --- DB-VAE -----------------------------------------------
-# --- VAE loss
+
 def _vae_loss(
     x: torch.Tensor,
     x_recon: torch.Tensor,
@@ -47,21 +46,30 @@ def _vae_loss(
         x_recon:    Reconstructed tensor     [B, C, H, W].
         mu:         Encoded mean             [B, latent_dim].
         log_sigma:  Encoded log std dev      [B, latent_dim].
-        kl_weight:  Weight on latent loss — controls disentanglement.
+        kl_weight:  KL loss weight.
 
     Returns:
-        Scalar loss tensor.
+        Per-sample VAE loss [B].
     '''
     latent_loss = 0.5 * torch.sum(torch.exp(log_sigma) + mu ** 2 -1 - log_sigma, dim=1)
     recon_loss = torch.mean(torch.abs(x - x_recon), dim=(1, 2, 3))
     vae_loss = kl_weight * latent_loss + recon_loss
     return vae_loss
 
-# --- classification loss
 def _classification_loss(
     y_logit: torch.Tensor,
     y: torch.Tensor,
 ) -> torch.Tensor:
+    '''
+    Binary cross-entropy loss per sample.
+
+    Args:
+        y_logit: Predicted logits  [B, 1].
+        y:       Binary labels     [B, 1].
+
+    Returns:
+        Per-sample classification loss [B, 1].
+    '''
     # classification loss — per sample [B], reduction='none' for weighting
     cls_loss = F.binary_cross_entropy_with_logits(
         y_logit, y, reduction='none'
@@ -79,38 +87,31 @@ def _debiasing_loss(
     log_sigma: torch.Tensor,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     '''
-    Loss function for DB-VAE.
+    DB-VAE total loss: classification loss + VAE loss on face samples only.
+
+    VAE loss is gated by indicator — only applied to face samples (y=1),
+    not background. Forces latent space to model face variation only.
+
+        L = mean( L_cls + 1[y=1] * L_VAE )
 
     Args:
         x:          True input                              [B, C, H, W].
         x_pred:     Reconstructed input                     [B, C, H, W].
-        y:          True binary labels — face=1, nonface=0  [B, 1].
+        y:          Binary labels — face=1, nonface=0       [B, 1].
         y_logit:    Predicted logits                        [B, 1].
         mu:         Mean of latent distribution             [B, latent_dim].
         log_sigma:  Log std dev of latent distribution      [B, latent_dim].
 
     Returns:
-        total_loss:          DB-VAE total loss scalar.
-        classification_loss: Classification loss scalar.
+        total_loss: DB-VAE total loss scalar.
+        cls_loss:   Per-sample classification loss [B].
     '''
-    
-    # vae loss — per sample [B]
-    vae_loss = _vae_loss(
-        x=x,
-        x_recon=x_pred,
-        mu=mu,
-        log_sigma=log_sigma,
-    )
-    
-    # classification loss — per sample [B], reduction='none' for weighting
-    cls_loss = _classification_loss(
-        y_logit=y_logit,
-        y=y)
+    vae_loss = _vae_loss(x=x, x_recon=x_pred, mu=mu, log_sigma=log_sigma)
+    cls_loss = _classification_loss(y_logit=y_logit, y=y)
     
     # using train data labels to create a variable for indicator:
     indicate   = (y == 1.0).float().squeeze(-1)
     cls_loss   = cls_loss.squeeze(-1)
-    
     # define DB-VAE total loss:
     total_loss = torch.mean(cls_loss + indicate * vae_loss)
     
@@ -121,7 +122,7 @@ def dbvae_step_fn(
     x: torch.Tensor,
     y: torch.Tensor,
     dbvae: DB_VAE,
-) -> nn.Module:
+) -> torch.Tensor:
     '''
     One forward pass + DB-VAE loss computation.
 
@@ -133,16 +134,14 @@ def dbvae_step_fn(
     Returns:
         Scalar total loss Tensor.
     '''
-    
-    # make prediction
     y_logit, z_mean, z_logsigma, recon = dbvae(x)
     
     total_loss, _ = _debiasing_loss(
-            x=x,
-            x_pred=recon,
-            y=y,
-            y_logit=y_logit,
-            mu=z_mean,
-            log_sigma=z_logsigma, 
-            )
+        x=x,
+        x_pred=recon,
+        y=y,
+        y_logit=y_logit,
+        mu=z_mean,
+        log_sigma=z_logsigma,
+    )
     return total_loss

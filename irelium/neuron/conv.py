@@ -8,17 +8,13 @@ reusable primitive building blocks
 import torch
 import torch.nn as nn
 
-# --------------------------------------------------
-# DB-VAE
-# --------------------------------------------------
-# --- encoder block
+
 class ConvNormBlock(nn.Module):
     '''
     Conv2d → BatchNorm2d → ReLU with learned spatial downsampling.
 
-    For VAE: Strided conv (instead of MaxPool) — preserves spatial information
-    for VAE reconstruction. Decoder can learn the inverse mapping;
-    MaxPool discards information permanently.
+    Strided conv instead of MaxPool — preserves spatial information
+    for VAE reconstruction; decoder can learn the inverse mapping.
 
     Args:
         in_channels:  Input feature channels.
@@ -36,18 +32,18 @@ class ConvNormBlock(nn.Module):
         padding: int
     ) -> None:
         super().__init__()
-        self.block = nn.Sequential(
+        self.normblock = nn.Sequential(
             nn.Conv2d(
                 in_channels, out_channels,
                 kernel_size, stride, padding,
                 bias=False,
             ),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU()
+            nn.ReLU(inplace=True)
         )
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.block(x)
+        return self.normblock(x)
 
 # --- decoder block
 class ConvTransposeBlock(nn.Module):
@@ -78,18 +74,15 @@ class ConvTransposeBlock(nn.Module):
         output_padding: int
         ) -> None:
         super().__init__()
-        self.block = nn.ConvTranspose2d(
+        self.conv_t = nn.ConvTranspose2d(
             in_channels, out_channels,
             kernel_size, stride, padding,
             output_padding=output_padding,
         )
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.block(x)
+        return self.conv_t(x)
     
-# --------------------------------------------------
-# UTILITY BLOCKS
-# --------------------------------------------------
 class Reshape(nn.Module):
     '''
     Reshape tensor to target shape inside nn.Sequential.
@@ -109,4 +102,4 @@ class Reshape(nn.Module):
         self.shape = shape
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return x.view(-1, *self.shape)
+        return x.view(x.size(0), *self.shape)

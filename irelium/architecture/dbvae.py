@@ -8,20 +8,18 @@ dbvae
 import numpy as np
 import torch
 import torch.nn as nn
-
-
 from pathlib import Path
-from irelium.architecture.cnn import cnnConvNorm
-from irelium.architecture.vae import cnnDecoder
-from irelium.utils import as_tensor
+from irelium.architecture.backbone import ConvBackbone
+from irelium.architecture.decoder import Decoder
+from irelium.utils import as_tensor, load_config
 
-#Path(__file__).parent.parent / "config" / "color" / "colors.yaml"
+_CFG = load_config("dbvae")
+
 
 class DB_VAE(nn.Module):
     '''
-    debiasing variational autoencoder (DB-VAE).
+    Debiasing variational autoencoder (DB-VAE).
 
-    Combines a CNN encoder, VAE reparameterization, and CNN decoder.
     Encoder outputs classification logit + latent distribution (mu, logsigma).
     Decoder reconstructs input from sampled latent vector z.
 
@@ -35,67 +33,62 @@ class DB_VAE(nn.Module):
         base_filter: Base filter count for encoder and decoder.
     '''
     
-    def __init__(self,
-                 H: int,
-                 W: int,
-                 in_channels: int,
-                 latent_dim: int,
-                 base_filter: int,
-                 
-                 ):
+    def __init__(
+        self,
+        latent_dim: int,
+        base_filter: int,
+    ) -> None:
         super().__init__()
         self.latent_dim = latent_dim
-        self.encoder = cnnConvNorm(n_outputs=2 * latent_dim + 1, 
-                                   H=H, W=W, 
-                                   in_channels=in_channels, 
-                                   base_filter=base_filter, 
-                                   stride=2, 
-                                   channel_schedule=[1, 2, 4, 6])
-        self.decoder = cnnDecoder(latent_dim=latent_dim, 
-                                  base_filter=base_filter)
+        self.encoder = ConvBackbone(
+            n_outputs=2 * latent_dim + 1,
+            H=_CFG.model.H,
+            W=_CFG.model.W,
+            in_channels=_CFG.model.in_channels,
+            base_filter=base_filter,
+            channel_schedule=_CFG.encoder.channel_schedule,
+        )
+        self.decoder = Decoder(
+            latent_dim=latent_dim,
+            base_filter=base_filter,
+        )
         
-    def encode(self,
-               x: torch.Tensor) -> tuple:
+    def encode(self, x: torch.Tensor) -> tuple:
         '''
-        Encode input x → classification logit + latent distribution.
-        x: Input image tensor [B, 3, H, W].
+        Encode input → classification logit + latent distribution.
+
+        Args:
+            x: Input image tensor [B, 3, H, W].
+
         Returns:
             y_logit:    Classification logit    [B, 1].
             z_mean:     Latent mean             [B, latent_dim].
             z_logsigma: Latent log std dev       [B, latent_dim].
         '''
-        # encoder outputs flat tensor [B, 2*latent_dim+1]
-        encoder_output = self.encoder(x)
+        encoder_output = self.encoder(x)  # [B, 2*latent_dim+1]
         
-        # split into 3 parts:
         # [0]              → classification logit
         # [1:latent_dim+1] → latent mean
         # [latent_dim+1:]  → latent log std dev
-        # classification prediction
-        y_logit = encoder_output[:, 0].unsqueeze(-1)
-        # latent variable distribution parameters
-        z_mean = encoder_output[:, 1 : self.latent_dim + 1]
+        y_logit    = encoder_output[:, 0].unsqueeze(-1)
+        z_mean     = encoder_output[:, 1 : self.latent_dim + 1]
         z_logsigma = encoder_output[:, self.latent_dim + 1 :]
         return y_logit, z_mean, z_logsigma
     
-    def predict(
-        self,
-        x: torch.Tensor
-    ) -> torch.Tensor:
+    def predict(self, x: torch.Tensor) -> torch.Tensor:
         '''
-        classification only — skips decoder for inference speed.
+        Classification only — skips decoder for inference speed.
 
-        x: Input image tensor [B, 3, H, W].
+        Args:
+            x: Input image tensor [B, 3, H, W].
+
         Returns:
-        y_logit: Classification logit [B, 1].
+            y_logit: Classification logit [B, 1].
         '''
         y_logit, _, _ = self.encode(x)
         return y_logit
     
-    def forward(
-        self,
-        x: torch.Tensor
-    ) -> tuple:
+    def forward(self, x: torch.Tensor) -> tuple:
         '''
         Full forward pass: encode → reparameterize → decode.
 
@@ -103,10 +96,10 @@ class DB_VAE(nn.Module):
             x: Input image tensor [B, 3, H, W].
 
         Returns:
-            y_logit:    Classification logit        [B, 1].
-            z_mean:     Latent mean                 [B, latent_dim].
-            z_logsigma: Latent log std dev           [B, latent_dim].
-            recon:      Reconstructed image          [B, 3, H, W].
+            y_logit:    Classification logit    [B, 1].
+            z_mean:     Latent mean             [B, latent_dim].
+            z_logsigma: Latent log std dev       [B, latent_dim].
+            recon:      Reconstructed image      [B, 3, H, W].
         '''
         y_logit, z_mean, z_logsigma = self.encode(x)
         z_reparam = self._reparameterize(z_mean, z_logsigma)
@@ -114,10 +107,10 @@ class DB_VAE(nn.Module):
         return y_logit, z_mean, z_logsigma, recon
     
     def _reparameterize(
-            self,
-            z_mean: torch.Tensor,
-            z_logsigma: torch.Tensor,
-         ) -> torch.Tensor:
+        self,
+        z_mean: torch.Tensor,
+        z_logsigma: torch.Tensor,
+    ) -> torch.Tensor:
         '''
         Reparameterization trick — sample z from latent distribution.
         Private: only called internally by forward().
@@ -139,6 +132,18 @@ class DB_VAE(nn.Module):
         '''
         epsilon = torch.randn_like(z_mean)
         return z_mean + torch.exp(0.5 * z_logsigma) * epsilon
+    
+    def _decode(self, z: torch.Tensor) -> torch.Tensor:
+        '''
+        Args:
+            z: Latent vector [B, latent_dim].
+
+        Returns:
+            Reconstructed image [B, 3, H, W].
+        '''
+        reconstruction = self.decoder(z)
+        return reconstruction
+
 
 
     def _decode(
@@ -180,40 +185,43 @@ class DB_VAE(nn.Module):
 # rare faces sampled more often → model sees them more → bias reduced 
 
 def get_latent_mu(
-    images: torch.Tensor,
+    images: np.ndarray | torch.Tensor,
     model: nn.Module,
-    batch_size: int
+    batch_size: int,
 ) -> np.ndarray:
     '''
-    Extract latent means for all images without loading all into GPU at once.
+    Extract latent means for all images in batches.
 
     Args:
-        images:     Input images [N, C, H, W].
-        model:      Trained DB_VAE model.
+        images:     Input images [N, H, W, C] channels-last.
+        model:      Trained DB_VAE — must be in eval mode.
         batch_size: Number of images per forward pass.
 
     Returns:
         z_mean: Latent means [N, latent_dim].
+
+    Raises:
+        ValueError: If images are not channels-last with C in (1, 3).
     '''
-    # turn model to eval mode
-    model.eval()
-    
+   
     # transfer image to model's device
     images_t = as_tensor(images, model=model)
-    assert images_t.shape[-1] in (1,3), \
-        f'Expected channels-last [N,H,W,C], got shape {images_t.shape}'
+
+    if images_t.ndim != 4 or images_t.shape[-1] not in (1, 3):
+        raise ValueError(
+            f"Expected channels-last [N, H, W, C] with C in (1, 3), "
+            f"got shape {images_t.shape}"
+        )
     
     all_z_mean = []
     
     with torch.inference_mode():
         for start in range(0, len(images_t), batch_size):
-            batch = images_t[start:start + batch_size].permute(0, 3, 1, 2)
+            batch = images_t[start : start + batch_size].permute(0, 3, 1, 2)
             _, z_mean, _ = model.encode(batch)
             all_z_mean.append(z_mean.cpu())
-    
-    # concatenate all partial z_mean
-    mu = torch.cat(all_z_mean, dim=0).numpy()
-    return mu
+
+    return torch.cat(all_z_mean, dim=0).numpy()
     
 
 # --- get training sample based on sample probability
@@ -223,30 +231,38 @@ def get_train_sample_probability(
     bins: int = 10,
     batch_size: int = 64,
     smoothing_fac: float = 0.001,
-) -> np.array:
+) -> np.ndarray:
     '''
-    Function that recomputes the sampling probabilities for images within a batch
-    based on how they distribute across the training data
+    Compute per-image sampling probability inversely proportional to
+    latent space density — rare samples get higher weight.
+
+    For each latent dimension: histogram density → inverse → max across dims.
+    Ensures underrepresented faces are sampled more often during training.
+
+    Args:
+        images:        Input images [N, H, W, C].
+        model:         Trained DB_VAE — must be in eval mode.
+        bins:          Histogram bins per latent dimension.
+        batch_size:    Batch size for latent extraction.
+        smoothing_fac: Additive smoothing to avoid zero density.
+
+    Returns:
+        training_sample_p: Sampling probabilities [N], sums to 1.
     '''
-    
-    latent_dim = model.latent_dim
-    
-    # run input batch and get latent variabe means
+    model.eval()
     images = as_tensor(images, model=model)
     mu = get_latent_mu(images, model=model, batch_size=batch_size)
-    
-    # sample probabilities for the images
     training_sample_p = np.zeros(mu.shape[0], dtype=np.float64)
-    
+
     # consider the distribution for each latent variable
-    for i in range(latent_dim):
+    for i in range(model.latent_dim):
         latent_distribution = mu[:, i]
         
         # histogram distribution over this latent dimension
         hist_density, bin_edges = np.histogram(
             latent_distribution,
             density=True,
-            bins=bins
+            bins=bins,
         )
         
         # smooth to avoid zero density → zero division
@@ -266,9 +282,11 @@ def get_train_sample_probability(
             # Common samples → small weight
             # Rare samples → large weight
         
-        sample_density = np.array([hist_smoothed_density[idx - 1] for idx in bin_idx])
-        # or fancy index
-        # sample_density = hist_smoothed_density[bin_idx - 1]
+        # fancy index
+        sample_density = hist_smoothed_density[bin_idx - 1]
+        # equivalent:
+        #sample_density = np.array([hist_smoothed_density[idx - 1] for idx in bin_idx])
+        
         prob_den = 1.0 / sample_density
         prob_den /= prob_den.sum()
         
