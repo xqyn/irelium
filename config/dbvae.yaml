@@ -1,0 +1,7 @@
+model:
+  H: 64
+  W: 64
+  in_channels: 3
+
+encoder:
+  channel_schedule: [1, 2, 4, 6]

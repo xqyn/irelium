@@ -1,0 +1,8 @@
+bottleneck_multiplier: 6
+bottleneck_spatial: 4
+stride: 2
+out_channels: 3
+
+channel_schedule: [4, 2, 1, 0]
+kernel_schedule:  [3, 3, 5, 5]
+padding_schedule: [1, 1, 2, 2]
