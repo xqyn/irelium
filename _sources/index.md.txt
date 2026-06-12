@@ -46,3 +46,10 @@ api/train
 
 notebooks/dbvae
 \```
+
+```{toctree}
+:hidden:
+:caption: API Reference
+
+autoapi/index
+```

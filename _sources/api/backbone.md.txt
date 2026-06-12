@@ -1,4 +1,8 @@
 <!-- docs/api/backbone.md -->
 # Backbone
 
-::: irelium.architecture.backbone
+CNN backbone with linear classification head.
+
+```{eval-rst}
+.. autofunction:: irelium.architecture.backbone.ConvBackbone
+```

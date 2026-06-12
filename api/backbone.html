@@ -173,7 +173,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -191,7 +191,36 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  
+  <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/dev/index.html">dev</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/test/index.html">test</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoapi/loss/index.html">loss</a><input aria-label="Toggle navigation of loss" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/loss/dbvaeL/index.html">loss.dbvaeL</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/utils/index.html">utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/trace/index.html">trace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/graph/index.html">graph</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoapi/neuron/index.html">neuron</a><input aria-label="Toggle navigation of neuron" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/neuron/conv/index.html">neuron.conv</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoapi/engine/index.html">engine</a><input aria-label="Toggle navigation of engine" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/engine/train/index.html">engine.train</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoapi/architecture/index.html">architecture</a><input aria-label="Toggle navigation of architecture" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/architecture/backbone/index.html">architecture.backbone</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/architecture/dbvae/index.html">architecture.dbvae</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/architecture/decoder/index.html">architecture.decoder</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
 </div>
 </div>
 
@@ -223,7 +252,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -231,8 +260,31 @@
           <!-- docs/api/backbone.md -->
 <section id="backbone">
 <h1>Backbone<a class="headerlink" href="#backbone" title="Link to this heading">¶</a></h1>
-<div class="irelium.architecture.backbone docutils">
-</div>
+<p>CNN backbone with linear classification head.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="irelium.architecture.backbone.ConvBackbone">
+<span class="sig-prename descclassname"><span class="pre">irelium.architecture.backbone.</span></span><span class="sig-name descname"><span class="pre">ConvBackbone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_schedule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.modules.container.Sequential.html#torch.nn.modules.container.Sequential" title="(in PyTorch v2.12)"><span class="pre">Sequential</span></a></span></span><a class="reference internal" href="../_modules/irelium/architecture/backbone.html#ConvBackbone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#irelium.architecture.backbone.ConvBackbone" title="Link to this definition">¶</a></dt>
+<dd><p>Baseline CNN: strided conv blocks → linear classification head.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_outputs</strong> – Number of output logits.</p></li>
+<li><p><strong>H</strong> – Input image height — must be divisible by stride^len(channel_schedule).</p></li>
+<li><p><strong>W</strong> – Input image width  — must be divisible by stride^len(channel_schedule).</p></li>
+<li><p><strong>in_channels</strong> – Input image channels.</p></li>
+<li><p><strong>base_filter</strong> – Base filter count, scaled per block by channel_schedule.</p></li>
+<li><p><strong>channel_schedule</strong> – Filter multipliers per block — controls depth and width.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>nn.Sequential backbone.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If H or W are not divisible by stride^len(channel_schedule).</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
         </article>
@@ -260,8 +312,27 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Backbone</a><ul>
+<li><a class="reference internal" href="#irelium.architecture.backbone.ConvBackbone"><code class="docutils literal notranslate"><span class="pre">ConvBackbone()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
