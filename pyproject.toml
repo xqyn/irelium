@@ -10,3 +10,11 @@ requires-python = '>=3.11'
 
 [tool.setuptools.packages.find]
 where = ['.']
+
+
+[project.optional-dependencies]
+docs = [
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.25",
+    "mkdocs-jupyter>=0.24",
+]

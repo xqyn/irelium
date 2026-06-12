@@ -1,0 +1,46 @@
+site_name: irelium
+site_description: Debiasing Variational Autoencoder
+repo_url: https://github.com/YOUR_USERNAME/irelium
+repo_name: irelium
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [irelium]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+  - mkdocs-jupyter:
+      execute: false
+      include_source: true
+
+nav:
+  - Home: index.md
+  - API Reference:
+    - Backbone: api/backbone.md
+    - Decoder: api/decoder.md
+    - DB-VAE: api/dbvae.md
+    - Loss: api/loss.md
+    - Training: api/train.md
+  - Notebooks:
+    - DB-VAE Experiments: notebooks/dbvae.ipynb
