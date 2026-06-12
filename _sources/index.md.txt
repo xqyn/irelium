@@ -15,41 +15,28 @@ reweighting samples whose latent factors are over-represented during training.
 
 ## Installation
 
-\```bash
+```bash
 pip install -e .
-\```
+```
 
 ## Quick Start
 
-\```python
+```python
 from irelium.architecture.dbvae import DBVAE
-\```
+```
 
----
-
-\```{toctree}
+```{toctree}
 :maxdepth: 2
 :caption: API Reference
 :hidden:
 
-api/backbone
-api/decoder
-api/dbvae
-api/loss
-api/train
-\```
+autoapi/index
+```
 
-\```{toctree}
+```{toctree}
 :maxdepth: 1
 :caption: Notebooks
 :hidden:
 
 notebooks/dbvae
-\```
-
-```{toctree}
-:hidden:
-:caption: API Reference
-
-autoapi/index
 ```
