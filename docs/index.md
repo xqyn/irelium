@@ -1,15 +1,42 @@
+---
+myst:
+  html_meta:
+    description: "irelium — Debiasing Variational Autoencoder"
+---
+
 # irelium
 
 A PyTorch implementation of the **Debiasing Variational Autoencoder (DB-VAE)**.
 
 ## Overview
 
-DB-VAE addresses representation bias in learned latent spaces by ...
+DB-VAE addresses representation bias in learned latent spaces by adaptively
+reweighting samples whose latent factors are over-represented during training.
 
 ## Installation
 
+```bash
 pip install -e .
+```
 
 ## Quick Start
 
+```python
 from irelium.architecture.dbvae import DBVAE
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: API Reference
+:hidden:
+
+autoapi/index
+```
+
+<!-- ```{toctree}
+:maxdepth: 1
+:caption: Notebooks
+:hidden:
+
+../notebook/dbvae
+``` -->

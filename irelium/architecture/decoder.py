@@ -3,7 +3,7 @@ irelium
 XQ
 2026-05-20
 CNN decoder: latent vector → reconstructed image.
-    05-29: add _CFG
+05-29: add _CFG
 '''
 
 import torch.nn as nn

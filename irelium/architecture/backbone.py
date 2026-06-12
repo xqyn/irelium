@@ -3,7 +3,7 @@ irelium
 XQ
 2026-05-20
 CNN backbone with linear classification head.
-    05-29: add _CFG
+05-29: add _CFG
 '''
 
 import torch.nn as nn
