@@ -38,5 +38,5 @@ autoapi/index
 :caption: Notebooks
 :hidden:
 
-notebooks/dbvae
+../notebook/dbvae
 ```
