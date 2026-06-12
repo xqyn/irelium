@@ -1,0 +1,57 @@
+graph
+=====
+
+.. py:module:: graph
+
+.. autoapi-nested-parse::
+
+   irelium
+   XQ
+   2026-05-20
+   Diagnostic visualization utilities.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   graph.plot_grad_norms
+   graph.plot_weight_distributions
+   graph.plot_loss_landscape
+   graph.plot_activations
+   graph.plot_training_curves
+
+
+Module Contents
+---------------
+
+.. py:function:: plot_grad_norms(model: torch.nn.Module) -> None
+
+   Bar chart of per-layer gradient L2 norms after backward pass.
+
+
+.. py:function:: plot_weight_distributions(model: torch.nn.Module) -> None
+
+   Histogram of weight distributions per trainable layer.
+
+
+.. py:function:: plot_loss_landscape(model: torch.nn.Module, loss_fn: Callable, x: torch.Tensor, y: torch.Tensor, steps: int = 20, scale: float = 0.01) -> None
+
+   2D contour plot of loss surface along two random directions in weight space.
+
+   Perturbs model weights along random directions dx, dy and evaluates loss.
+   Model weights are always restored after plotting.
+
+
+.. py:function:: plot_activations(model: torch.nn.Module, x: torch.Tensor) -> None
+
+   Histogram of activation distributions at each leaf module.
+
+
+.. py:function:: plot_training_curves(loss_history: list, acc_history: list | None = None) -> None
+
+   Loss (log scale) and optional accuracy curves over training steps.
+
+

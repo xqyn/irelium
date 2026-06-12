@@ -1,0 +1,40 @@
+architecture.decoder
+====================
+
+.. py:module:: architecture.decoder
+
+.. autoapi-nested-parse::
+
+   irelium
+   XQ
+   2026-05-20
+   CNN decoder: latent vector → reconstructed image.
+       05-29: add _CFG
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   architecture.decoder.Decoder
+
+
+Module Contents
+---------------
+
+.. py:function:: Decoder(latent_dim: int, base_filter: int) -> torch.nn.Sequential
+
+   Latent vector z → reconstructed image [B, out_channels, H, W].
+
+   All architecture hyperparameters loaded from config/decoder.yaml.
+
+   :param latent_dim: Latent vector dimension — must match encoder.
+   :param base_filter: Base filter count — must match encoder.
+
+   :returns: nn.Sequential decoder.
+
+   :raises AssertionError: If channel, kernel, padding schedules differ in length.
+
+

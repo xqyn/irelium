@@ -1,0 +1,17 @@
+architecture
+============
+
+.. py:module:: architecture
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/architecture/backbone/index
+   /autoapi/architecture/dbvae/index
+   /autoapi/architecture/decoder/index
+
+

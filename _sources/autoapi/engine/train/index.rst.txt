@@ -1,0 +1,59 @@
+engine.train
+============
+
+.. py:module:: engine.train
+
+.. autoapi-nested-parse::
+
+   irelium
+   XQ
+   2026-05-26
+   Training and evaluation loop utilities.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   engine.train.train
+   engine.train.evaluation
+
+
+Module Contents
+---------------
+
+.. py:function:: train(x: torch.Tensor, y: torch.Tensor, model: torch.nn.Module, step_fn: Callable[[torch.Tensor, torch.Tensor, torch.nn.Module], torch.Tensor], optimizer: torch.optim.Optimizer) -> float
+
+   Single training step — forward, loss, backward, update.
+
+   :param x: Input tensor   [B, ...].
+   :param y: Target tensor  [B, ...].
+   :param model: Any nn.Module.
+   :param step_fn: Callable(x, y, model) -> scalar Tensor.
+   :param optimizer: Any torch optimizer.
+
+   :returns: Scalar loss as Python float.
+
+   :raises TypeError: If x or y are not torch.Tensor.
+
+
+.. py:function:: evaluation(x: torch.Tensor, y: torch.Tensor, model: torch.nn.Module, pred_fn: Callable[[torch.Tensor], torch.Tensor], metric_fn: Callable[[torch.Tensor, torch.Tensor], torch.Tensor]) -> float
+
+   Single evaluation step — forward, predict, metric.
+
+   pred_fn handles model output unpacking — for DB_VAE pass
+   pred_fn=lambda out: out[0] to extract y_logit from the tuple.
+
+   :param x: Input tensor  [B, ...].
+   :param y: Target tensor [B, ...].
+   :param model: Any nn.Module.
+   :param pred_fn: Callable(model_output) -> predictions.
+   :param metric_fn: Callable(y_pred, y_true) -> scalar.
+
+   :returns: Scalar metric as Python float.
+
+   :raises TypeError: If x or y are not torch.Tensor.
+
+

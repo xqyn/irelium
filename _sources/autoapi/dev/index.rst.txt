@@ -1,0 +1,51 @@
+dev
+===
+
+.. py:module:: dev
+
+.. autoapi-nested-parse::
+
+   project: sequencing
+   XQ - Leiden UMC
+   dev
+   april 3
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   dev.reload
+   dev.check
+   dev.dev_check
+
+
+Module Contents
+---------------
+
+.. py:function:: reload(obj)
+
+   Reload the source module of a class or function and return
+   the updated version of that object.
+
+   Usage:
+       from dev import reload
+       SeqQuery = reload(SeqQuery)
+       reload(SeqQuery)
+
+
+.. py:function:: check(obj)
+
+   Check if a reload actually picked up changes.
+   Pass this to reload() to get a before/after diff report.
+
+   Usage:
+       SeqQuery = reload(check(SeqQuery))
+       # or just
+       reload(check(SeqQuery))
+
+
+.. py:function:: dev_check()
+

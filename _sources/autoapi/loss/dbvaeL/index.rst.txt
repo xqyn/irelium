@@ -1,0 +1,36 @@
+loss.dbvaeL
+===========
+
+.. py:module:: loss.dbvaeL
+
+.. autoapi-nested-parse::
+
+   irelium
+   XQ
+   2026-05-20
+   DB-VAE loss functions.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   loss.dbvaeL.dbvae_step_fn
+
+
+Module Contents
+---------------
+
+.. py:function:: dbvae_step_fn(x: torch.Tensor, y: torch.Tensor, dbvae: irelium.architecture.dbvae.DB_VAE) -> torch.Tensor
+
+   One forward pass + DB-VAE loss computation.
+
+   :param x: Input image batch  [B, C, H, W].
+   :param y: Binary labels      [B, 1].
+   :param dbvae: DB_VAE model.
+
+   :returns: Scalar total loss Tensor.
+
+

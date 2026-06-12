@@ -1,0 +1,102 @@
+neuron.conv
+===========
+
+.. py:module:: neuron.conv
+
+.. autoapi-nested-parse::
+
+   irelium
+   XQ
+   2026-05-20
+   reusable primitive building blocks
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   neuron.conv.ConvNormBlock
+   neuron.conv.ConvTransposeBlock
+   neuron.conv.Reshape
+
+
+Module Contents
+---------------
+
+.. py:class:: ConvNormBlock(in_channels: int, out_channels: int, kernel_size: int, stride: int, padding: int)
+
+   Bases: :py:obj:`torch.nn.Module`
+
+
+   Conv2d → BatchNorm2d → ReLU with learned spatial downsampling.
+
+   Strided conv instead of MaxPool — preserves spatial information
+   for VAE reconstruction; decoder can learn the inverse mapping.
+
+   :param in_channels: Input feature channels.
+   :param out_channels: Output feature channels.
+   :param kernel_size: Convolution kernel size.
+   :param stride: Spatial downsampling factor.
+   :param padding: Zero-padding on each side.
+
+
+   .. py:attribute:: normblock
+
+
+   .. py:method:: forward(x: torch.Tensor) -> torch.Tensor
+
+
+.. py:class:: ConvTransposeBlock(in_channels: int, out_channels: int, kernel_size: int, stride: int, padding: int, output_padding: int)
+
+   Bases: :py:obj:`torch.nn.Module`
+
+
+   ConvTranspose2d for spatial upsampling in VAE decoder.
+
+   No BatchNorm or activation here — caller wraps with nn.Sequential
+   + ReLU if needed. Last decoder layer must be activation-free to
+   allow raw pixel values; keeping activation outside the block makes
+   this explicit at the assembly level.
+
+   :param in_channels: Input feature channels.
+   :param out_channels: Output feature channels.
+   :param kernel_size: Convolution kernel size.
+   :param stride: Spatial upsampling factor.
+   :param padding: Zero-padding on each side.
+   :param output_padding: Extra rows/cols added to output shape (0 or 1).
+                          Required when stride > 1 to resolve shape ambiguity.
+
+
+   .. py:attribute:: conv_t
+
+
+   .. py:method:: forward(x: torch.Tensor) -> torch.Tensor
+
+
+.. py:class:: Reshape(*shape: int)
+
+   Bases: :py:obj:`torch.nn.Module`
+
+
+   Reshape tensor to target shape inside nn.Sequential.
+
+   Enables latent vector → spatial feature map transition
+   in decoder without breaking the Sequential pipeline.
+
+   :param \*shape: Target shape excluding batch dimension.
+
+   .. rubric:: Example
+
+   Reshape(256, 4, 4)  # [B, 4096] → [B, 256, 4, 4]
+
+
+   .. py:attribute:: shape
+      :value: ()
+
+
+
+   .. py:method:: forward(x: torch.Tensor) -> torch.Tensor
+
+

@@ -1,0 +1,59 @@
+trace
+=====
+
+.. py:module:: trace
+
+.. autoapi-nested-parse::
+
+   irelium
+   XQ
+   2026-05-20
+   Loss history tracker with EMA smoothing.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   trace.LossHistory
+
+
+Module Contents
+---------------
+
+.. py:class:: LossHistory(smoothing_factor: float = 0.99)
+
+   Tracks raw and smoothed loss via exponential moving average.
+
+   :param smoothing_factor: EMA alpha (0 = no smoothing, 0.99 = heavy smoothing).
+
+
+   .. py:attribute:: smoothing_factor
+      :value: 0.99
+
+
+
+   .. py:attribute:: raw
+      :value: []
+
+
+
+   .. py:attribute:: smooth
+      :value: []
+
+
+
+   .. py:method:: append(loss: float) -> None
+
+      Append a new loss value and update EMA.
+
+
+
+   .. py:method:: reset() -> None
+
+      Clear all history and reset EMA.
+
+
+

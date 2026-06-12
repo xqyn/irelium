@@ -1,0 +1,58 @@
+utils
+=====
+
+.. py:module:: utils
+
+.. autoapi-nested-parse::
+
+   irelium
+   XQ
+   2026-05-22
+   Shared utilities: config loading and tensor conversion.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   utils.load_config
+   utils.as_tensor
+
+
+Module Contents
+---------------
+
+.. py:function:: load_config(name: str) -> box.Box
+
+   Load a YAML config by name from config/.
+
+   :param name: Config filename without extension (e.g. 'backbone').
+
+   :returns: Box of config values — supports dot access.
+
+   :raises FileNotFoundError: If config file does not exist.
+
+
+.. py:function:: as_tensor(x: numpy.ndarray | torch.Tensor, model: torch.nn.Module | None = None, device: torch.device | None = None) -> torch.Tensor
+
+   Convert x to float32 tensor, optionally move to device.
+
+   Device resolution order:
+       1. model parameter device — if model provided
+       2. device argument        — if provided
+       3. CPU                    — default
+
+   :param x: Input array or tensor.
+   :param model: nn.Module — infers device from parameters.
+                 Takes priority over device argument.
+   :param device: Explicit target device. Used if model is None.
+
+   :returns: torch.Tensor float32 on resolved device.
+
+   :raises TypeError: If x is not np.ndarray or torch.Tensor.
+   :raises TypeError: If model is not nn.Module.
+   :raises ValueError: If model has no parameters.
+
+

@@ -1,0 +1,132 @@
+architecture.dbvae
+==================
+
+.. py:module:: architecture.dbvae
+
+.. autoapi-nested-parse::
+
+   irelium
+   XQ
+   2026-05-20
+   dbvae
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   architecture.dbvae.DB_VAE
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   architecture.dbvae.get_latent_mu
+   architecture.dbvae.get_train_sample_probability
+
+
+Module Contents
+---------------
+
+.. py:class:: DB_VAE(latent_dim: int, base_filter: int)
+
+   Bases: :py:obj:`torch.nn.Module`
+
+
+   Debiasing variational autoencoder (DB-VAE).
+
+   Encoder outputs classification logit + latent distribution (mu, logsigma).
+   Decoder reconstructs input from sampled latent vector z.
+
+   Public API:
+       forward(x)  → y_logit, z_mean, z_logsigma, recon
+       encode(x)   → y_logit, z_mean, z_logsigma
+       predict(x)  → y_logit
+
+   :param latent_dim: Dimension of latent space z.
+   :param base_filter: Base filter count for encoder and decoder.
+
+
+   .. py:attribute:: latent_dim
+
+
+   .. py:attribute:: encoder
+
+
+   .. py:attribute:: decoder
+
+
+   .. py:method:: encode(x: torch.Tensor) -> tuple
+
+      Encode input → classification logit + latent distribution.
+
+      :param x: Input image tensor [B, 3, H, W].
+
+      :returns: Classification logit    [B, 1].
+                z_mean:     Latent mean             [B, latent_dim].
+                z_logsigma: Latent log std dev       [B, latent_dim].
+      :rtype: y_logit
+
+
+
+   .. py:method:: predict(x: torch.Tensor) -> torch.Tensor
+
+      Classification only — skips decoder for inference speed.
+
+      :param x: Input image tensor [B, 3, H, W].
+
+      :returns: Classification logit [B, 1].
+      :rtype: y_logit
+
+
+
+   .. py:method:: forward(x: torch.Tensor) -> tuple
+
+      Full forward pass: encode → reparameterize → decode.
+
+      :param x: Input image tensor [B, 3, H, W].
+
+      :returns: Classification logit    [B, 1].
+                z_mean:     Latent mean             [B, latent_dim].
+                z_logsigma: Latent log std dev       [B, latent_dim].
+                recon:      Reconstructed image      [B, 3, H, W].
+      :rtype: y_logit
+
+
+
+.. py:function:: get_latent_mu(images: numpy.ndarray | torch.Tensor, model: torch.nn.Module, batch_size: int) -> numpy.ndarray
+
+   Extract latent means for all images in batches.
+
+   :param images: Input images [N, H, W, C] channels-last.
+   :param model: Trained DB_VAE — must be in eval mode.
+   :param batch_size: Number of images per forward pass.
+
+   :returns: Latent means [N, latent_dim].
+   :rtype: z_mean
+
+   :raises ValueError: If images are not channels-last with C in (1, 3).
+
+
+.. py:function:: get_train_sample_probability(images: numpy.ndarray | torch.Tensor, model: DB_VAE, bins: int = 10, batch_size: int = 64, smoothing_fac: float = 0.001) -> numpy.ndarray
+
+   Compute per-image sampling probability inversely proportional to
+   latent space density — rare samples get higher weight.
+
+   For each latent dimension: histogram density → inverse → max across dims.
+   Ensures underrepresented faces are sampled more often during training.
+
+   :param images: Input images [N, H, W, C].
+   :param model: Trained DB_VAE — must be in eval mode.
+   :param bins: Histogram bins per latent dimension.
+   :param batch_size: Batch size for latent extraction.
+   :param smoothing_fac: Additive smoothing to avoid zero density.
+
+   :returns: Sampling probabilities [N], sums to 1.
+   :rtype: training_sample_p
+
+
