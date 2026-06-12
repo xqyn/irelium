@@ -33,10 +33,10 @@ from irelium.architecture.dbvae import DBVAE
 autoapi/index
 ```
 
-```{toctree}
+<!-- ```{toctree}
 :maxdepth: 1
 :caption: Notebooks
 :hidden:
 
 ../notebook/dbvae
-```
+``` -->
