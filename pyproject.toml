@@ -17,7 +17,8 @@ docs-sphinx = [
     "sphinx>=7.0",
     "myst-parser>=3.0",
     "sphinx-autoapi>=3.0",
-    "furo>=2024.0",
+    #"furo>=2024.0",
+    "pydata-sphinx-theme>=0.15",
     "sphinx-copybutton",
 ]
 docs-mkdocs = [
