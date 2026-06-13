@@ -1,8 +1,8 @@
 # .readthedocs.yaml
-version: 2
+version: 0.1.0
 
 build:
-  os: ubuntu-24.04
+  os: macOS
   tools:
     python: "3.11"
 
